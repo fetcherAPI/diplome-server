@@ -1,7 +1,5 @@
 import { validationResult } from "express-validator";
-import UserModel from "../models/User.js";
 import VacancyModel from "../models/Vacancy.js";
-import jwt from "jsonwebtoken";
 
 export const createVacancy = async (req, res) => {
   try {
@@ -28,40 +26,6 @@ export const createVacancy = async (req, res) => {
     res.status(500).json({
       message: "Не удалось создать вакансию",
       data: err,
-    });
-  }
-};
-
-export const getMe = async (req, res) => {
-  try {
-    const user = await UserModel.findById(req.userId);
-
-    if (!user) {
-      return res.status(404).json({
-        message: "user is not exist",
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        _id: user._id,
-      },
-      "secretKey",
-      {
-        expiresIn: "30d",
-      }
-    );
-
-    const { passwordHash, ...userData } = user._doc;
-    res.json({
-      ...userData,
-      token,
-      isLoggedIn: true,
-    });
-  } catch (err) {
-    console.log("err", err);
-    res.status(500).json({
-      message: "forbiden",
     });
   }
 };
