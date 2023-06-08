@@ -12,6 +12,8 @@ import {
   getVacancyList,
 } from "./controllers/VacancyController.js";
 import { newVacancyValidator } from "./validations/newVacancyValidator.js";
+import { newsValidator } from "./validations/newsValidator.js";
+import { createNews, getNewsList } from "./controllers/NewsController.js";
 
 const app = express();
 
@@ -47,25 +49,17 @@ const options = {
   apis: ["./routes/*.js"],
 };
 
-const specs = swaggerJSDoc(options);
-
-app.use(
-  "/api-docs",
-  express.json(),
-  cors(),
-  swaggerUi.serve,
-  swaggerUi.setup(specs, { explorer: true })
-);
+app.use(express.json(), cors());
 
 app.post("/auth/register", registerValidator, register);
-
 app.post("/auth/login", login);
-
 app.post("/auth/me", checkToken, getMe);
 
 app.post("/vacancy", checkToken, newVacancyValidator, createVacancy);
-
 app.get("/vacancy", getVacancyList);
+
+app.post("/news", checkToken, newsValidator, createNews);
+app.get("/news", getNewsList);
 
 app.listen(4444, (err) => {
   if (err) {

@@ -18,7 +18,7 @@ export const createVacancy = async (req, res) => {
       const vacancy = await doc.save();
 
       res.json({
-        vacancy,
+        ...vacancy._doc,
       });
     }
   } catch (err) {
