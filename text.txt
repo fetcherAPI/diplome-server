@@ -1,0 +1,244 @@
+создание сревера и подк к БД монго
+////////////////////////////////////////////////////////////////////////////////
+import { register, login, getMe } from "./controllers/UserController.js";
+import {
+  createVacancy,
+  getVacancyList,
+} from "./controllers/VacancyController.js";
+import { newVacancyValidator } from "./validations/newVacancyValidator.js";
+import { newsValidator } from "./validations/newsValidator.js";
+import { createNews, getNewsList } from "./controllers/NewsController.js";
+
+const app = express();
+
+mongoose
+  .connect(
+    `mongodb+srv://root:${env.DATABASE_PASSWORD}@cluster0.jq6wt5c.mongodb.net/blog`
+  )
+  .then(() => console.log("DB"))
+  .catch((err) => console.log("error", err));
+
+app.use(express.json(), cors());
+//////////////////////////////////////////////////////////////////////////////////
+
+
+Методы для обр HTTP запросов
+//////////////////////////////////////////////////////////////////////////////////
+app.post("/auth/register", registerValidator, register);
+app.post("/auth/login", login);
+app.post("/auth/me", checkToken, getMe);
+
+app.post("/vacancy", checkToken, newVacancyValidator, createVacancy);
+app.get("/vacancy", getVacancyList);
+
+app.post("/news", checkToken, newsValidator, createNews);
+app.get("/news", getNewsList);
+//////////////////////////////////////////////////////////////////////////////////
+
+
+app.listen(4444, (err) => {
+  if (err) {
+    console.log("err", err);
+  }
+  console.log("server ");
+});
+
+Регистрация админа
+/////////////////////////////////////////////////////////////////////////////////
+export const register = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json(errors.array());
+    } else {
+      const password = req.body.password;
+      const salt = await bctypt.genSalt(10);
+      const hash = await bctypt.hash(password, salt);
+
+      const doc = new UserModel({
+        email: req.body.email,
+        fullName: req.body.fullName,
+        passwordHash: hash,
+      });
+
+      const user = await doc.save();
+
+      const { passwordHash, ...userData } = user._doc;
+
+      const token = generateJwt({ userId: user._id }, "secretKey", "30d");
+
+      res.json({
+        ...userData,
+        token,
+      });
+    }
+  } catch (err) {
+    console.log("error", err);
+    res.status(500).json({
+      message: "Не удалось зарегестрироваться",
+      data: err,
+    });
+  }
+};
+/////////////////////////////////////////////////////////////////////////////
+
+Метод для логина
+/////////////////////////////////////////////////////////////////////////////
+export const login = async (req, res) => {
+  try {
+    const user = await UserModel.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User is not exist",
+      });
+    }
+    const isValidPassword = await bctypt.compare(
+      req.body.password,
+      user._doc.passwordHash
+    );
+
+    if (!isValidPassword) {
+      return res.status(400).json({
+        message: "Incorrect login or password",
+      });
+    }
+
+    const token = generateJwt({ userId: user._id }, "secretKey", "30d");
+
+    const { passwordHash, ...userData } = user._doc;
+    res.json({
+      ...userData,
+      token,
+    });
+  } catch (err) {}
+};
+//////////////////////////////////////////////////////////////////////////////////
+
+
+
+стр вакансий 
+//////////////////////////////////////////////////////////////////////////////////
+import React, { useState } from "react";
+import classes from "./Vacancy.module.scss";
+import open from "../assets/img/Polygon 4.svg";
+import close from "../assets/img/Polygon 4 (1).svg";
+import { classNames } from "shared";
+import { Link } from "react-router-dom";
+type Props = {
+  id: string;
+  vacancyName: string;
+  vacancyDescription: string;
+  vacancyRequirements: Array<string>;
+  vacancyConditions: Array<string>;
+  vacancyResponsibilities: Array<string>;
+};
+
+export const Vacancy = (props: Props) => {
+  const {
+    id,
+    vacancyName,
+    vacancyDescription,
+    vacancyRequirements,
+    vacancyConditions,
+    vacancyResponsibilities,
+  } = props;
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  return (
+    <div
+      className={classNames(classes.Vacancy, { [classes.opened]: isOpen }, [])}
+    >
+      <div className={classes.vacancy_header}>
+        <div>
+          <h1 className={classes.title}>{vacancyName}</h1>
+          <p className={classes.descriotion}>{vacancyDescription}</p>
+        </div>
+
+        <button onClick={!isOpen ? handleOpen : handleClose}>
+          <img src={!isOpen ? open : close} alt="" />
+        </button>
+      </div>
+      <div className={classes.details_list}>
+        <Details title="Обязанности" details={vacancyResponsibilities} />
+        <Details title="Требования" details={vacancyRequirements} />
+        <Details title="Условия" details={vacancyConditions} />
+      </div>
+
+      <p className={classes.message_for_future_employe}>
+        Отправьте свое резюме на этот эл.адрес
+      </p>
+      <Link to="mailto:zhaisan.moon@gmail.com" className={classes.email}>
+        zhaisan.moon@gmail.com
+      </Link>
+    </div>
+  );
+};
+
+type detailProps = {
+  title: string;
+  details: Array<string>;
+};
+
+const Details = ({ title, details }: detailProps) => {
+  return (
+    <div className={classes.details}>
+      <h1 className={classes.detail_title}>{title}</h1>
+      <ul>
+        {details.map((detail) => (
+          <li key={detail} className={classes.details_item}>
+            {detail}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+/////////////////////////////////////////////////////////////////////////////
+
+локальное хранилище для корзины
+/////////////////////////////////////////////////////////////////////////////
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { IBasketShema, IOrderInBasket } from "../../types/BasketSliceShema";
+import storage from "redux-persist/lib/storage";
+import { persistReducer } from "redux-persist";
+
+const initialState: IBasketShema = {
+  OrdersInBasket: [],
+};
+
+const persistConfig = {
+  key: "basket",
+  storage,
+};
+
+export const BasketSlice = createSlice({
+  name: "Basket",
+  initialState,
+  reducers: {
+    addToBasket(state, action: PayloadAction<IOrderInBasket>) {
+      state.OrdersInBasket = [...state.OrdersInBasket, action.payload];
+    },
+    removeFromBasket(state, action: PayloadAction<string>) {
+      state.OrdersInBasket = state.OrdersInBasket.filter(
+        (el) => el.id !== action.payload
+      );
+    },
+  },
+});
+
+export const { addToBasket, removeFromBasket } = BasketSlice.actions;
+export const persistedBasketReducer = persistReducer(
+  persistConfig,
+  BasketSlice.reducer
+);
+/////////////////////////////////////////////////////////////////////////////////////

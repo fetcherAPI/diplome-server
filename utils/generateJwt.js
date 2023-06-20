@@ -1,0 +1,15 @@
+import jwt from "jsonwebtoken";
+
+export const generateJwt = (usefullData, key, lifeLimitWithDays) => {
+  const token = jwt.sign(
+    {
+      ...usefullData,
+    },
+    key,
+    {
+      expiresIn: lifeLimit,
+    }
+  );
+
+  return token;
+};

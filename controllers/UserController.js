@@ -2,6 +2,8 @@ import { validationResult } from "express-validator";
 import UserModel from "../models/User.js";
 import bctypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { generateJwt } from "../utils/generateJwt.js";
+
 export const register = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -20,17 +22,10 @@ export const register = async (req, res) => {
 
       const user = await doc.save();
 
-      const token = jwt.sign(
-        {
-          _id: user._id,
-        },
-        "secretKey",
-        {
-          expiresIn: "30d",
-        }
-      );
-
       const { passwordHash, ...userData } = user._doc;
+
+      const token = generateJwt({ userId: user._id }, "secretKey", "30d");
+
       res.json({
         ...userData,
         token,
@@ -65,21 +60,12 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      {
-        _id: user._id,
-      },
-      "secretKey",
-      {
-        expiresIn: "30d",
-      }
-    );
+    const token = generateJwt({ userId: user._id }, "secretKey", "30d");
 
     const { passwordHash, ...userData } = user._doc;
     res.json({
       ...userData,
       token,
-      isLoggedIn: true,
     });
   } catch (err) {}
 };
