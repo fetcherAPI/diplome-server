@@ -12,6 +12,8 @@ import {
 import { newVacancyValidator } from "./validations/newVacancyValidator.js";
 import { newsValidator } from "./validations/newsValidator.js";
 import { createNews, getNewsList } from "./controllers/NewsController.js";
+import { OrderValidator } from "./validations/OrderValidator.js";
+import { createOrder } from "./controllers/OrderController.js";
 
 const app = express();
 
@@ -32,6 +34,8 @@ app.get("/vacancy", getVacancyList);
 
 app.post("/news", checkToken, newsValidator, createNews);
 app.get("/news", getNewsList);
+
+app.post("/order", OrderValidator, createOrder);
 
 app.listen(4444, (err) => {
   if (err) {
