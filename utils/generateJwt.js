@@ -7,7 +7,7 @@ export const generateJwt = (usefullData, key, lifeLimitWithDays) => {
     },
     key,
     {
-      expiresIn: lifeLimit,
+      expiresIn: lifeLimitWithDays,
     }
   );
 

@@ -26,7 +26,7 @@ export const register = async (req, res) => {
 
       const token = generateJwt({ userId: user._id }, "secretKey", "30d");
 
-      res.json({
+      return res.json({
         ...userData,
         token,
       });
@@ -41,6 +41,7 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
+  console.log("req.body", req.body);
   try {
     const user = await UserModel.findOne({ email: req.body.email });
 
@@ -63,7 +64,7 @@ export const login = async (req, res) => {
     const token = generateJwt({ userId: user._id }, "secretKey", "30d");
 
     const { passwordHash, ...userData } = user._doc;
-    res.json({
+    return res.json({
       ...userData,
       token,
     });
