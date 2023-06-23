@@ -10,7 +10,11 @@ import { newVacancyValidator } from "./validations/newVacancyValidator.js";
 import { newsValidator } from "./validations/newsValidator.js";
 import { createNews, getNewsList } from "./controllers/NewsController.js";
 import { OrderValidator } from "./validations/OrderValidator.js";
-import { createOrder } from "./controllers/OrderController.js";
+import {
+  createOrder,
+  deleteOrderById,
+  getOrderList,
+} from "./controllers/OrderController.js";
 
 export const RoutesEx = (app) => {
   app.post("/auth/register", registerValidator, register);
@@ -24,4 +28,6 @@ export const RoutesEx = (app) => {
   app.get("/news", getNewsList);
 
   app.post("/order", OrderValidator, createOrder);
+  app.get("/order", checkToken, getOrderList);
+  app.delete("/order/:id", checkToken, deleteOrderById);
 };

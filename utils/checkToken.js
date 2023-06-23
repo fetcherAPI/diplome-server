@@ -11,13 +11,13 @@ export default (req, res, next) => {
       next();
     } catch (err) {
       return res.status(403).json({
-        message: "Forbiden",
+        message: "Доступ запрещен",
       });
     }
   } else {
     console.log("403", 403);
     return res.status(403).json({
-      message: "Forbiden",
+      message: "Доступ запрещен",
     });
   }
 };

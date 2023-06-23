@@ -28,3 +28,32 @@ export const createOrder = async (req, res) => {
     });
   }
 };
+
+export const getOrderList = async (req, res) => {
+  try {
+    const orders = await OrderModel.find();
+    res.json({
+      orders,
+    });
+  } catch (err) {
+    console.log("err", err);
+    res.status(500).json({
+      message: "server error",
+    });
+  }
+};
+
+export const deleteOrderById = async (req, res) => {
+  try {
+    console.log("req.body", req.body);
+    let orders = await OrderModel.findByIdAndDelete({ _id: req.params.id });
+    return res.json({
+      message: "success ",
+    });
+  } catch (err) {
+    console.log("err", err);
+    res.status(500).json({
+      message: "server error",
+    });
+  }
+};

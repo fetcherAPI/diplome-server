@@ -7,8 +7,8 @@ export const newVacancyValidator = [
       min: 3,
     }),
   body("vacancyDescription", "Минимум 10 символов").isLength({ min: 10 }),
-  body("vacancyRequirements", "Минимум 3 элемент")
-    .isArray({ min: 3 })
+  body("vacancyRequirements", "Минимум 1 элемент")
+    .isArray({ min: 1 })
     .notEmpty(),
   body("vacancyConditions", "Минимум 1 элемент").isArray({ min: 1 }),
   body("vacancyResponsibilities", "Минимум 1 символов").isArray({ min: 1 }),

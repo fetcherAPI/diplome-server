@@ -16,6 +16,7 @@ export const createNews = async (req, res) => {
 
       res.json({
         news,
+        message: "Успешно создан",
       });
     }
   } catch (err) {
@@ -29,9 +30,9 @@ export const createNews = async (req, res) => {
 
 export const getNewsList = async (req, res) => {
   try {
-    const vacancys = await NewsModel.find();
+    const news = await NewsModel.find();
     res.json({
-      vacancys,
+      news,
     });
   } catch (err) {
     console.log("err", err);
